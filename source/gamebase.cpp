@@ -42,7 +42,7 @@ void CGAMEBASE::Initialize()
 
 
   videoSetModeSub(MODE_2_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG3_ACTIVE);
-  videoSetMode(MODE_2_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG3_ACTIVE);
+  videoSetMode(MODE_3_2D | DISPLAY_BG0_ACTIVE  | DISPLAY_BG3_ACTIVE | DISPLAY_CHAR_BASE(2) | DISPLAY_SCREEN_BASE(2));
   
   m_mainText->Initialize() ;
   m_subText->Initialize() ;

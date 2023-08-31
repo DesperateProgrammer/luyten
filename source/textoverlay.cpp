@@ -36,12 +36,12 @@ void CTEXTOVERLAY::Initialize()
     vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE); // for sub engine
   } else
   {
-    vramSetBankA(VRAM_A_MAIN_BG);
+    vramSetBankB(VRAM_B_MAIN_BG_0x06020000);
     BGCTRL[0] = BG_TILE_BASE(2) | BG_MAP_BASE(1) | BG_COLOR_256 | BG_32x32 ;
 
     bgExtPaletteEnable();
-    dmaCopy(m_tileDataSource,(void *)CHAR_BASE_BLOCK(2),m_dataLength);
-    memset((void *)SCREEN_BASE_BLOCK(1), 0, 32*32*2) ;
+    dmaCopy(m_tileDataSource,(void *)(CHAR_BASE_BLOCK(2)+128*1024),m_dataLength);
+    memset((void *)(SCREEN_BASE_BLOCK(1) + 128*1024), 0, 32*32*2) ;
 //    dmaCopy(m_tileMapSource,(void *)SCREEN_BASE_BLOCK(1),m_mapLength);
     // you can only access extended palettes in LCD mode
     vramSetBankE(VRAM_E_LCD); // for main engine
@@ -67,14 +67,18 @@ void CTEXTOVERLAY::EnableTextWindow(uint8_t x, uint8_t y, uint8_t width, uint8_t
   ((volatile uint16_t *)(0x4000000 + m_screen * 0x1000))[0] |= (1 << 13) ;
   ((volatile uint16_t *)(0x4000040 + m_screen * 0x1000))[0] = (x << 8) | ((x + width) << 0) ;
   ((volatile uint16_t *)(0x4000040 + m_screen * 0x1000))[2] = (y << 8) | ((y + height) << 0) ;
-  ((volatile uint16_t *)(0x4000040 + m_screen * 0x1000))[4] = 0x0001 ;
+  ((volatile uint16_t *)(0x4000040 + m_screen * 0x1000))[4] = 0x0021 ;
   ((volatile uint16_t *)(0x4000040 + m_screen * 0x1000))[5] = 0x3F3F ;
+  ((volatile uint16_t *)(0x4000050 + m_screen * 0x1000))[0] = 0x00C8 ;
+  ((volatile uint16_t *)(0x4000050 + m_screen * 0x1000))[2] = 0x0008 ;
 }
 
 void CTEXTOVERLAY::DisableTextwindow() 
 {
   ((volatile uint16_t *)(0x4000000 + m_screen * 0x1000))[0] &= ~(1 << 13) ;
   ((volatile uint16_t *)(0x4000040 + m_screen * 0x1000))[4] = 0x003F ;  
+  ((volatile uint16_t *)(0x4000050 + m_screen * 0x1000))[0] = 0x0000 ;
+  ((volatile uint16_t *)(0x4000050 + m_screen * 0x1000))[2] = 0x0000 ;
 }
 
 void CTEXTOVERLAY::Clear()
@@ -82,7 +86,7 @@ void CTEXTOVERLAY::Clear()
   if (m_screen == 1)
     memset((void *)SCREEN_BASE_BLOCK_SUB(1), 0, 32*32*2) ;
   else
-    memset((void *)SCREEN_BASE_BLOCK(1), 0, 32*32*2) ;  
+    memset((void *)(SCREEN_BASE_BLOCK(1) + 128*1024), 0, 32*32*2) ;  
     
   DisableTextwindow() ;
 }
@@ -97,8 +101,8 @@ void CTEXTOVERLAY::SetChar(uint8_t x, uint8_t y, char ch, uint8_t pal)
     ((uint16_t *)(SCREEN_BASE_BLOCK_SUB(1)))[x + y*2*32 + 32] = tileB | (pal << 12) ;
   } else
   {
-    ((uint16_t *)(SCREEN_BASE_BLOCK(1)))[x + y*2*32] = tileA | (pal << 12)  ;
-    ((uint16_t *)(SCREEN_BASE_BLOCK(1)))[x + y*2*32 + 32] = tileB | (pal << 12) ;
+    ((uint16_t *)(SCREEN_BASE_BLOCK(1) + 128*1024))[x + y*2*32] = tileA | (pal << 12)  ;
+    ((uint16_t *)(SCREEN_BASE_BLOCK(1) + 128*1024))[x + y*2*32 + 32] = tileB | (pal << 12) ;
   }
 }
 
@@ -112,8 +116,8 @@ void CTEXTOVERLAY::SetBiColorChar(uint8_t x, uint8_t y, char ch, uint8_t pal1, u
     ((uint16_t *)(SCREEN_BASE_BLOCK_SUB(1)))[x + y*2*32 + 32] = tileB | (pal2 << 12) ;
   } else
   {
-    ((uint16_t *)(SCREEN_BASE_BLOCK(1)))[x + y*2*32] = tileA | (pal1 << 12)  ;
-    ((uint16_t *)(SCREEN_BASE_BLOCK(1)))[x + y*2*32 + 32] = tileB | (pal2 << 12) ;
+    ((uint16_t *)(SCREEN_BASE_BLOCK(1) + 128*1024))[x + y*2*32] = tileA | (pal1 << 12)  ;
+    ((uint16_t *)(SCREEN_BASE_BLOCK(1) + 128*1024))[x + y*2*32 + 32] = tileB | (pal2 << 12) ;
   }
 }
 
